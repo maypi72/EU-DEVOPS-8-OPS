@@ -194,22 +194,22 @@ echo ""
 echo "📊 Instalando Metrics Server..."
 if ! kubectl get deployment metrics-server -n kube-system &> /dev/null; then
     kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml 2>&1 | grep -v "unchanged" || true
-    
-    # Parchear para funcionar con Kind (certificados auto-firmados)
-    echo "⏳ Esperando a que Metrics Server esté disponible..."
-    sleep 5
-    kubectl patch deployment metrics-server -n kube-system --type='json' -p='[
-      {
-        "op": "add",
-        "path": "/spec/template/spec/containers/0/args/-",
-        "value": "--kubelet-insecure-tls"
-      }
-    ]' 2>&1 | grep -v "unchanged" || true
-    
     echo -e "${GREEN}✅ Metrics Server instalado${NC}"
 else
     echo -e "${YELLOW}ℹ️  Metrics Server ya está instalado${NC}"
 fi
+
+# Parche TLS para entornos de desarrollo (certificados auto-firmados)
+echo "🔧 Aplicando configuración TLS para Metrics Server..."
+kubectl patch deployment metrics-server -n kube-system --type='json' -p='[
+  {
+    "op": "add",
+    "path": "/spec/template/spec/containers/0/args/-",
+    "value": "--kubelet-insecure-tls"
+  }
+]' 2>&1 | grep -v "unchanged" || true
+
+echo -e "${GREEN}✅ Metrics Server configurado${NC}"
 echo ""
 
 
