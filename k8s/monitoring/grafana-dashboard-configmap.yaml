@@ -1,0 +1,430 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: monitoring-8
+  labels:
+    grafana_dashboard: "1"
+data:
+  la-huella-dashboard.json: |
+    {
+      "title": "La Huella - Monitorización",
+      "tags": ["kubernetes", "la-huella"],
+      "timezone": "browser",
+      "schemaVersion": 16,
+      "version": 0,
+      "refresh": "10s",
+      "uid": "la-huella-monitoring",
+      "editable": true,
+      "panels": [
+          {
+            "id": 1,
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+            "type": "graph",
+            "title": "CPU Usage por Pod",
+            "targets": [
+              {
+                "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"la-huella-8\", pod!=\"\"}[1m])) by (pod)",
+                "legendFormat": "{{pod}}",
+                "refId": "A"
+              }
+            ],
+            "yaxes": [
+              {"format": "short", "label": "CPU cores", "show": true},
+              {"format": "short", "show": true}
+            ],
+            "xaxis": {"show": true, "mode": "time"},
+            "lines": true,
+            "fill": 1,
+            "linewidth": 2,
+            "pointradius": 5,
+            "legend": {"show": true, "values": true, "current": true, "max": true}
+          },
+          {
+            "id": 2,
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+            "type": "graph",
+            "title": "Memoria Usage por Pod",
+            "targets": [
+              {
+                "expr": "sum(container_memory_working_set_bytes{namespace=\"la-huella-8\", pod!=\"\"}) by (pod)",
+                "legendFormat": "{{pod}}",
+                "refId": "A"
+              }
+            ],
+            "yaxes": [
+              {"format": "bytes", "label": "Memoria", "show": true},
+              {"format": "short", "show": true}
+            ],
+            "xaxis": {"show": true, "mode": "time"},
+            "lines": true,
+            "fill": 1,
+            "linewidth": 2,
+            "pointradius": 5,
+            "legend": {"show": true, "values": true, "current": true, "max": true}
+          },
+          {
+            "id": 3,
+            "gridPos": {"h": 6, "w": 8, "x": 0, "y": 8},
+            "type": "stat",
+            "title": "Pods Running",
+            "targets": [
+              {
+                "expr": "count(kube_pod_status_phase{namespace=\"la-huella-8\", phase=\"Running\"})",
+                "refId": "A"
+              }
+            ],
+            "options": {
+              "graphMode": "none",
+              "colorMode": "value",
+              "textMode": "value_and_name"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"value": 0, "color": "red"},
+                    {"value": 1, "color": "yellow"},
+                    {"value": 2, "color": "green"}
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "id": 4,
+            "gridPos": {"h": 6, "w": 8, "x": 8, "y": 8},
+            "type": "stat",
+            "title": "Container Restarts (Total)",
+            "targets": [
+              {
+                "expr": "sum(kube_pod_container_status_restarts_total{namespace=\"la-huella-8\"})",
+                "refId": "A"
+              }
+            ],
+            "options": {
+              "graphMode": "none",
+              "colorMode": "value",
+              "textMode": "value_and_name"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"value": 0, "color": "green"},
+                    {"value": 1, "color": "yellow"},
+                    {"value": 5, "color": "red"}
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "id": 5,
+            "gridPos": {"h": 6, "w": 8, "x": 16, "y": 8},
+            "type": "stat",
+            "title": "Deployments Ready",
+            "targets": [
+              {
+                "expr": "count(kube_deployment_status_replicas_available{namespace=\"la-huella-8\"})",
+                "refId": "A"
+              }
+            ],
+            "options": {
+              "graphMode": "none",
+              "colorMode": "value",
+              "textMode": "value_and_name"
+            }
+          },
+          {
+            "id": 6,
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
+            "type": "graph",
+            "title": "CPU Usage - App Pods",
+            "targets": [
+              {
+                "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"la-huella-8\", pod=~\"app.*\"}[1m])) by (pod)",
+                "legendFormat": "{{pod}}",
+                "refId": "A"
+              }
+            ],
+            "yaxes": [
+              {"format": "short", "label": "CPU cores", "show": true},
+              {"format": "short", "show": true}
+            ],
+            "xaxis": {"show": true, "mode": "time"},
+            "lines": true,
+            "fill": 1,
+            "linewidth": 2,
+            "alert": {
+              "conditions": [
+                {
+                  "evaluator": {"params": [0.1], "type": "gt"},
+                  "operator": {"type": "and"},
+                  "query": {"params": ["A", "5m", "now"]},
+                  "reducer": {"params": [], "type": "avg"},
+                  "type": "query"
+                }
+              ],
+              "name": "CPU Alta en App"
+            }
+          },
+          {
+            "id": 7,
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
+            "type": "graph",
+            "title": "Memoria Usage - PostgreSQL",
+            "targets": [
+              {
+                "expr": "sum(container_memory_working_set_bytes{namespace=\"la-huella-8\", pod=~\"postgres.*\"}) by (pod)",
+                "legendFormat": "{{pod}}",
+                "refId": "A"
+              }
+            ],
+            "yaxes": [
+              {"format": "bytes", "label": "Memoria", "show": true},
+              {"format": "short", "show": true}
+            ],
+            "xaxis": {"show": true, "mode": "time"},
+            "lines": true,
+            "fill": 1,
+            "linewidth": 2
+          },
+          {
+            "id": 8,
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 22},
+            "type": "table",
+            "title": "Estado de Pods",
+            "targets": [
+              {
+                "expr": "kube_pod_info{namespace=\"la-huella-8\"}",
+                "format": "table",
+                "instant": true,
+                "refId": "A"
+              }
+            ],
+            "transformations": [
+              {
+                "id": "organize",
+                "options": {
+                  "excludeByName": {},
+                  "indexByName": {},
+                  "renameByName": {
+                    "pod": "Pod Name",
+                    "node": "Node",
+                    "created_by_kind": "Created By"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+    }
+  cert-manager-dashboard.json: |
+    {
+      "title": "cert-manager Certificates",
+      "tags": ["cert-manager", "certificates", "tls"],
+      "timezone": "browser",
+      "schemaVersion": 27,
+      "version": 1,
+      "refresh": "30s",
+      "uid": "cert-manager-dashboard",
+      "editable": true,
+      "panels": [
+        {
+          "datasource": "Prometheus",
+          "type": "gauge",
+          "id": 1,
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+          "title": "Certificate Ready Status",
+          "targets": [
+            {
+              "expr": "certmanager_certificate_ready_status",
+              "legendFormat": "{{namespace}}/{{name}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"value": 0, "color": "red"},
+                  {"value": 1, "color": "green"}
+                ]
+              },
+              "mappings": [],
+              "unit": "short"
+            }
+          },
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          }
+        },
+        {
+          "datasource": "Prometheus",
+          "type": "timeseries",
+          "id": 2,
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+          "title": "Days Until Certificate Expiration",
+          "targets": [
+            {
+              "expr": "(certmanager_certificate_expiration_timestamp_seconds - time()) / 86400",
+              "legendFormat": "{{namespace}}/{{name}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "unit": "d",
+              "custom": {
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "showPoints": "never"
+              }
+            }
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            }
+          }
+        },
+        {
+          "datasource": "Prometheus",
+          "type": "table",
+          "id": 3,
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8},
+          "title": "Certificate Expiration Table",
+          "targets": [
+            {
+              "expr": "(certmanager_certificate_expiration_timestamp_seconds - time()) / 86400",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"value": 0, "color": "red"},
+                  {"value": 7, "color": "red"},
+                  {"value": 30, "color": "yellow"},
+                  {"value": 90, "color": "green"}
+                ]
+              },
+              "unit": "d",
+              "custom": {
+                "align": "auto",
+                "displayMode": "color-background"
+              }
+            }
+          },
+          "options": {
+            "showHeader": true
+          },
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "instance": true,
+                  "job": true
+                },
+                "renameByName": {
+                  "Value": "Days Until Expiration",
+                  "name": "Certificate",
+                  "namespace": "Namespace"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "datasource": "Prometheus",
+          "type": "stat",
+          "id": 4,
+          "gridPos": {"h": 6, "w": 12, "x": 0, "y": 16},
+          "title": "Certificate Statistics",
+          "targets": [
+            {
+              "expr": "count(certmanager_certificate_ready_status)",
+              "legendFormat": "Total Certificates",
+              "refId": "A"
+            },
+            {
+              "expr": "count(certmanager_certificate_ready_status == 1)",
+              "legendFormat": "Ready Certificates",
+              "refId": "B"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"value": 0, "color": "green"}
+                ]
+              },
+              "unit": "short"
+            }
+          },
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value_and_name"
+          }
+        },
+        {
+          "datasource": "Prometheus",
+          "type": "timeseries",
+          "id": 5,
+          "gridPos": {"h": 6, "w": 12, "x": 12, "y": 16},
+          "title": "Days Until Certificate Renewal",
+          "targets": [
+            {
+              "expr": "(certmanager_certificate_renewal_timestamp_seconds - time()) / 86400",
+              "legendFormat": "{{namespace}}/{{name}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "unit": "d",
+              "custom": {
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "showPoints": "never"
+              }
+            }
+          },
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom"
+            }
+          }
+        }
+      ]
+    }

@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: la-huella-8
+  labels:
+    name: la-huella-8
+    environment: development
+    mission: "8"
