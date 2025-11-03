@@ -1,0 +1,164 @@
+---
+# ConfigMap con la configuración de Alertmanager
+# Revisa la configuración, puede que algunas alertas no estén configuradas
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: monitoring-8
+data:
+  alertmanager.yml: |
+    global:
+      resolve_timeout: 5m
+
+    # Plantillas para personalizar mensajes
+    templates:
+    - '/etc/alertmanager/templates/*.tmpl'
+
+    # Rutas de enrutamiento de alertas
+    route:
+      # Agrupar alertas por estos labels
+      group_by: ['alertname', 'severity', 'category']
+      
+      # Esperar 10s antes de enviar un grupo de alertas
+      group_wait: 10s
+      
+      # Esperar 10s antes de enviar nuevas alertas al mismo grupo
+      group_interval: 10s
+      
+      # Repetir alertas cada 12 horas si no se resuelven
+      repeat_interval: 12h
+      
+      # Receptor por defecto
+      receiver: 'webhook-local'
+      
+      # Rutas específicas por severidad
+      routes:
+      # Alertas críticas - enviar inmediatamente
+      - match:
+          severity: critical
+        receiver: 'webhook-local'
+        group_wait: 5s
+        repeat_interval: 4h
+      
+      # Alertas de warning - agrupar más
+      - match:
+          severity: warning
+        receiver: 'webhook-local'
+        group_wait: 30s
+        repeat_interval: 24h
+      
+      # Alertas de certificados - canal específico
+      - match:
+          category: certificates
+        receiver: 'webhook-local'
+        group_wait: 1m
+        repeat_interval: 24h
+
+    # Inhibición de alertas (evitar alertas duplicadas)
+    inhibit_rules:
+    # Si hay una alerta crítica de memoria, no enviar la de warning
+    - source_match:
+        severity: 'critical'
+        category: 'resources'
+      target_match:
+        severity: 'warning'
+        category: 'resources'
+      equal: ['pod', 'container']
+
+    # Si un pod no está ready, no alertar sobre CPU/memoria
+    - source_match:
+        alertname: 'PodNotReady'
+      target_match_re:
+        alertname: '(HighCPUUsage|HighMemoryUsage)'
+      equal: ['pod']
+
+    # Receptores (canales de notificación)
+    receivers:
+    # Webhook local para desarrollo
+    - name: 'webhook-local'
+      webhook_configs:
+      - url: 'http://webhook-receiver.monitoring-8.svc.cluster.local:8080'
+        send_resolved: true
+        max_alerts: 0  # Sin límite de alertas por mensaje
+        http_config:
+          follow_redirects: true
+
+---
+# Deployment de Alertmanager
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+  namespace: monitoring-8
+  labels:
+    app: alertmanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager
+  template:
+    metadata:
+      labels:
+        app: alertmanager
+    spec:
+      containers:
+        - name: alertmanager
+          image: prom/alertmanager:v0.26.0
+          args:
+            - "--config.file=/etc/alertmanager/alertmanager.yml"
+            - "--storage.path=/alertmanager"
+            - "--web.external-url=http://localhost:9093"
+          ports:
+            - containerPort: 9093
+              name: http
+          volumeMounts:
+            - name: config
+              mountPath: /etc/alertmanager
+            - name: storage
+              mountPath: /alertmanager
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 9093
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 9093
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      volumes:
+        - name: config
+          configMap:
+            name: alertmanager-config
+        - name: storage
+          emptyDir: {}
+
+---
+# Service de Alertmanager
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager
+  namespace: monitoring-8
+  labels:
+    app: alertmanager
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9093
+      targetPort: 9093
+      protocol: TCP
+      name: http
+  selector:
+    app: alertmanager
