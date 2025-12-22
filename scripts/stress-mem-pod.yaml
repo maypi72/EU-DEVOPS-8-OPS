@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: stress-mem-test
+  namespace: la-huella-8
+spec:
+  containers:
+    - name: stress-mem-test
+      image: polinux/stress
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "128Mi"
+        limits:
+          cpu: "200m"
+          memory: "256Mi"
+      command: ["stress"]
+      args: ["--vm", "1", "--vm-bytes", "240M", "--timeout", "400s"]
+  restartPolicy: Never

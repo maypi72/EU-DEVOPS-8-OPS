@@ -41,10 +41,7 @@ echo ""
 echo "Creando pod que consume CPU..."
 echo ""
 
-kubectl run stress-cpu-test --image=polinux/stress -n la-huella-8 \
-  --requests='cpu=100m,memory=128Mi' \
-  --limits='cpu=200m,memory=256Mi' \
-  -- stress --cpu 2 --timeout 400s
+kubectl apply -f ./stress-cpu-pod.yaml
 
 echo -e "${GREEN}✅ Pod creado${NC}"
 echo ""
@@ -75,10 +72,7 @@ echo ""
 echo "Creando pod que consume memoria..."
 echo ""
 
-kubectl run stress-mem-test --image=polinux/stress -n la-huella-8 \
-  --requests='cpu=100m,memory=128Mi' \
-  --limits='cpu=200m,memory=256Mi' \
-  -- stress --vm 1 --vm-bytes 220M --timeout 400s
+kubectl apply -f ./stress-mem-pod.yaml
 
 echo -e "${GREEN}✅ Pod creado${NC}"
 echo ""
