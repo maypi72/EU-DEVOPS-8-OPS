@@ -70,6 +70,8 @@ spec:
           mountPath: /var/lib/postgresql/data
         - name: init-script
           mountPath: /docker-entrypoint-initdb.d
+        - name: backup-storage
+          mountPath: /backups
         resources:
           requests:
             memory: "256Mi"
@@ -84,6 +86,9 @@ spec:
       - name: init-script
         configMap:
           name: postgres-init-script
+      - name: backup-storage
+        persistentVolumeClaim:
+          claimName: postgres-backups
 ---
 apiVersion: v1
 kind: Service
