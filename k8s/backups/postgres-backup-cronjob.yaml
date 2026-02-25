@@ -47,7 +47,7 @@ spec:
                   TS=$(date +"%Y%m%d_%H%M%S")
                   FILE="/backups/backup_${TS}.sql"
                   echo "[INFO] Iniciando backup en ${FILE}..."
-                  pg_dump -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" "$PGDATABASE" > "$FILE"
+                  pg_dump -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" --clean --if-exists "$PGDATABASE" > "$FILE"
                   echo "[INFO] Backup finalizado correctamente."
                   echo "[INFO] Eliminando archivos .sql con más de 7 días..."
                   find /backups -type f -name 'backup_*.sql' -mtime +7 -print -delete || true
