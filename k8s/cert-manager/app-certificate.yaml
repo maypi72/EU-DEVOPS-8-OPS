@@ -5,8 +5,8 @@ metadata:
   namespace: la-huella-8
 spec:
   secretName: app-tls
-  duration: 180d
-  renewBefore: 30d
+  duration: 4320h #180d
+  renewBefore: 720h #30d
   issuerRef:
     name: upcdevops-ssca
     kind: ClusterIssuer
