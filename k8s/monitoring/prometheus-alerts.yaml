@@ -7,10 +7,8 @@ data:
   alerts.yml: |
     groups:
       - name: required-alerts
-        # Intervalo de evaluación del grupo
         interval: 30s
         rules:
-
           # 1) HighCPUUsage — warning — CPU > 80% por 5 minutos
           - alert: HighCPUUsage
             expr: rate(container_cpu_usage_seconds_total{namespace="la-huella-8", container!="", container!="POD"}[5m]) > 0.8
@@ -23,7 +21,6 @@ data:
               description: "El pod {{ $labels.pod }} está usando >80% de CPU durante al menos 5 minutos en el namespace la-huella-8."
 
           # 2) HighMemoryUsage — warning — Memoria > 85% del límite por 5 minutos
-          # Nota: se filtran contenedores con límite > 0 para evitar dividir por cero.
           - alert: HighMemoryUsage
             expr: (
                     container_memory_working_set_bytes{namespace="la-huella-8", container!="", container!="POD"}
@@ -73,4 +70,3 @@ data:
             annotations:
               summary: "Backup de PostgreSQL falló"
               description: "El job de backup {{ $labels.job_name }} ha fallado en el namespace la-huella-8."
-              
