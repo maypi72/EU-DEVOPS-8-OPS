@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ingress
+  namespace: la-huella-8
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    cert-manager.io/cluster-issuer: upcdevops-ssca
+spec:
+  tls:
+    - hosts:
+        - la-huella.local
+        - app.la-huella-8.local
+      secretName: app-tls
+  rules:
+    - host: la-huella.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app          
+                port:
+                  number: 80
