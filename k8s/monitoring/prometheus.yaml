@@ -33,6 +33,8 @@ spec:
           mountPath: /etc/prometheus
         - name: storage
           mountPath: /prometheus
+        - name: prometheus-alerts
+          mountPath: /etc/prometheus/alerts
         resources:
           requests:
             memory: "512Mi"
@@ -46,6 +48,12 @@ spec:
           name: prometheus-config
       - name: storage
         emptyDir: {}
+      - name: prometheus-alerts
+        configMap:
+          name: prometheus-alerts
+          items:
+            - key: alerts.yml
+              path: alerts.yml
 ---
 apiVersion: v1
 kind: Service
