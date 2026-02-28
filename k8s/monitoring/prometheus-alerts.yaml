@@ -73,3 +73,4 @@ data:
             annotations:
               summary: "Backup de PostgreSQL falló"
               description: "El job de backup {{ $labels.job_name }} ha fallado en el namespace la-huella-8."
+              
