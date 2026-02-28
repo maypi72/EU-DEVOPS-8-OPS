@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: app-tls
+  namespace: la-huella-8
+spec:
+  secretName: app-tls
+  duration: 180d
+  renewBefore: 30d
+  issuerRef:
+    name: upcdevops-ssca
+    kind: ClusterIssuer
+  dnsNames:
+    - la-huella.local
+    - app.la-huella-8.local
+    - "*.la-huella.local"
