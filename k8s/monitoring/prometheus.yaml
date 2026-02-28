@@ -25,7 +25,6 @@ spec:
         args:
           - '--config.file=/etc/prometheus/prometheus.yml'
           - '--web.enable-lifecycle'
-          - '--rule.file=/etc/prometheus/alerts/alerts.yml'
           - '--storage.tsdb.path=/prometheus'
           - '--storage.tsdb.retention.time=7d'
         ports:
