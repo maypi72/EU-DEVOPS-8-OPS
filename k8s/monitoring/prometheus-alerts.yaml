@@ -23,7 +23,7 @@ data:
           # 2) HighMemoryUsage — warning — Memoria > 85% del límite por 5 minutos
           - alert: HighMemoryUsage
             expr: |
-              container_memory_working_set_bytes{namespace="la-huella-8", container!="", container!="POD"} 
+              (container_memory_working_set_bytes{namespace="la-huella-8", container!="", container!="POD"} 
               / 
               container_spec_memory_limit_bytes{namespace="la-huella-8", container!="", container!="POD"} > 0) > 0.85       
             for: 5m
