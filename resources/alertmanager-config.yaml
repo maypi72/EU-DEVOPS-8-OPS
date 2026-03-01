@@ -78,7 +78,7 @@ data:
     # Webhook local para desarrollo
     - name: 'webhook-local'
       webhook_configs:
-      - url: 'http://webhook-receiver.monitoring-8.svc.cluster.local:8080'
+      - url: 'http://webhook-receiver.monitoring-8.svc.cluster.local:8080/alerts'
         send_resolved: true
         max_alerts: 0  # Sin límite de alertas por mensaje
         http_config:
