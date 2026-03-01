@@ -105,8 +105,7 @@ spec:
       containers:
       - name: webhook-receiver
         image: python:3.11-alpine
-        command: ["python3"]
-        args: ["/app/webhook-receiver.py"]
+        command: ["python3","-u", "/app/webhook-receiver.py"]
         ports:
         - containerPort: 8080
           name: http
