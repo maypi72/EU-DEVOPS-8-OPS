@@ -114,6 +114,7 @@ spec:
         volumeMounts:
         - name: script
           mountPath: /app
+          subPath: webhook-receiver.py
         resources:
           requests:
             memory: "64Mi"
