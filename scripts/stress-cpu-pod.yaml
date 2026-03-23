@@ -15,5 +15,5 @@ spec:
           cpu: "1"
           memory: "256Mi"
       command: ["stress"]
-      args: ["--cpu", "0","--cpu-load", "100", "--timeout", "420s"]
+      args: ["--cpu", "1", "--timeout", "420s"]
   restartPolicy: Never
