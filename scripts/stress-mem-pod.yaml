@@ -15,12 +15,5 @@ spec:
           cpu: "200m"
           memory: "256Mi"
       command: ["stress"]
-      args: ["--vm", "1", "--vm-bytes", "220Mi","--vm-hang","1", "--timeout", "420s"]
-  resources:
-    limits:
-      memory: "256Mi"
-      cpu: "200m"
-    requests:
-      memory: "128Mi"
-      cpu: "100m"
+      args: ["--vm", "1", "--vm-bytes", "240M", "--vm-hang", "1", "--timeout", "420s"]
   restartPolicy: Never
