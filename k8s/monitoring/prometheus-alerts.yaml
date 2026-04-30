@@ -9,23 +9,26 @@ data:
       - name: required-alerts
         interval: 30s
         rules:
-          # 1) HighCPUUsage — warning — CPU > 80% por 5 minutos
+          # 1) HighCPUUsage — warning — CPU > 80% del límite por 5 minutos
           - alert: HighCPUUsage
-            expr: rate(container_cpu_usage_seconds_total{namespace="la-huella-8", container!="", container!="POD"}[5m]) > 0.8
+            expr: |
+              (rate(container_cpu_usage_seconds_total{namespace="la-huella-8", container!="", container!="POD"}[5m]) 
+              / 
+              container_spec_cpu_quota{namespace="la-huella-8", container!="", container!="POD"} * 100000) > 80
             for: 5m
             labels:
               severity: warning
               category: resources
             annotations:
               summary: "CPU alta en {{ $labels.pod }}"
-              description: "El pod {{ $labels.pod }} ha supero el umbral del 80% de CPU durante al menos 5 minutos en el namespace la-huella-8."
+              description: "El pod {{ $labels.pod }} ha superado el umbral del 80% de CPU durante al menos 5 minutos en el namespace la-huella-8."
 
           # 2) HighMemoryUsage — warning — Memoria > 85% del límite por 5 minutos
           - alert: HighMemoryUsage
             expr: |
               (container_memory_working_set_bytes{namespace="la-huella-8", container!="", container!="POD"} 
               / 
-              container_spec_memory_limit_bytes{namespace="la-huella-8", container!="", container!="POD"} > 0) > 0.85       
+              container_spec_memory_limit_bytes{namespace="la-huella-8", container!="", container!="POD"}) > 0.85
             for: 5m
             labels:
               severity: warning

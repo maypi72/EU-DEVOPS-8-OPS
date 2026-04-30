@@ -10,10 +10,10 @@ spec:
       resources:
         requests:
           cpu: "100m"
-          memory: "128Mi"
+          memory: "200Mi"
         limits:
           cpu: "200m"
-          memory: "256Mi"
+          memory: "300Mi"
       command: ["stress"]
-      args: ["--vm", "1", "--vm-bytes", "240M", "--vm-hang", "1", "--timeout", "420s"]
+      args: ["--vm", "1", "--vm-bytes", "260M", "--vm-hang", "1", "--timeout", "420s"]
   restartPolicy: Never
